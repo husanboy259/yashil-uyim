@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
-import { getTelegramUser } from '../lib/telegram'
+import { getTelegramUser, closeMiniApp, isTelegram } from '../lib/telegram'
 
 export default function Tickets() {
   const [submitted, setSubmitted] = useState(false)
@@ -56,6 +56,19 @@ export default function Tickets() {
   return (
     <div className="py-12 px-4">
       <div className="max-w-xl mx-auto">
+
+        {/* Close button (only in Telegram) */}
+        {isTelegram() && (
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={closeMiniApp}
+              className="w-10 h-10 flex items-center justify-center rounded-lg bg-[#1B2D1F] text-white hover:bg-[#40916C] transition-colors text-lg font-bold"
+              aria-label="Yopish"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Header */}
         <div className="text-center mb-8">
