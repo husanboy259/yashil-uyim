@@ -36,10 +36,6 @@ const features = [
 export default function Home() {
   return (
     <div>
-      {/* X button for Telegram */}
-      <div className="px-4 pt-4">
-        <XButton />
-      </div>
       {/* Hero */}
       <section className="bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#40916C] text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
