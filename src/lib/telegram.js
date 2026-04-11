@@ -26,13 +26,21 @@ export function closeMiniApp() {
   }
 }
 
-// Auto-request phone on mount — shows Telegram share popup
+// Auto-request phone — shows Telegram share popup
 export function requestPhone(callback) {
   if (!tg || !tg.requestContact) return
-  tg.requestContact((ok, contact) => {
-    if (ok && contact?.contact?.phone_number) {
-      const phone = contact.contact.phone_number
-      callback(phone.startsWith('+') ? phone : '+' + phone)
+
+  // Listen for the contactRequested event
+  tg.onEvent('contactRequested', (data) => {
+    if (data.status === 'sent') {
+      const phone =
+        data.contact?.phone_number ||
+        data.responseUnsafe?.contact?.phone_number
+      if (phone) {
+        callback(phone.startsWith('+') ? phone : '+' + phone)
+      }
     }
   })
+
+  tg.requestContact()
 }
