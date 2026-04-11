@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -30,10 +30,7 @@ export default function App() {
       {!inTelegram && <Navbar />}
       <main className="flex-1">
         <Routes>
-          <Route
-            path="/"
-            element={inTelegram ? <Navigate to="/chipta" replace /> : <Home />}
-          />
+          <Route path="/" element={<Home />} />
           <Route path="/chipta" element={<Tickets />} />
           <Route path="/dastur" element={<Program />} />
           <Route path="/yangiliklar" element={<News />} />
