@@ -15,6 +15,8 @@ export default function Tickets() {
   const defaultName = tgUser
     ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ')
     : ''
+  // Use phone saved from ContactShare page
+  const savedPhone = sessionStorage.getItem('tg_phone') || ''
 
   const {
     register,
@@ -25,7 +27,7 @@ export default function Tickets() {
   } = useForm({
     defaultValues: {
       full_name: defaultName,
-      phone: '',
+      phone: savedPhone,
       ticket_count: 1,
     },
   })
