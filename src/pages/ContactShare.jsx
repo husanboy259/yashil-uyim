@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { requestPhone } from '../lib/telegram'
-import { playTing } from '../lib/sound'
 
 export default function ContactShare() {
   const navigate = useNavigate()
@@ -14,7 +13,6 @@ export default function ContactShare() {
       sessionStorage.setItem('tg_phone', sharedPhone)
       setPhone(sharedPhone)
       setShowModal(true)
-      playTing()
     })
   }
 
