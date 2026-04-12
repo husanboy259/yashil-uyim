@@ -7,16 +7,18 @@ import Tickets from './pages/Tickets'
 import Program from './pages/Program'
 import News from './pages/News'
 import Suggestions from './pages/Suggestions'
+import ContactShare from './pages/ContactShare'
 import { isTelegram } from './lib/telegram'
 
 const inTelegram = isTelegram()
 
 function TelegramHome() {
-  // If user came from X button, show homepage. Otherwise redirect to /chipta
-  const visited = sessionStorage.getItem('tg_visited')
-  if (!visited) {
-    return <Navigate to="/chipta" replace />
+  const contacted = sessionStorage.getItem('tg_contacted')
+  // First time: show contact share screen
+  if (!contacted) {
+    return <Navigate to="/contact" replace />
   }
+  // After sharing: show homepage
   return <Home />
 }
 
@@ -39,10 +41,8 @@ export default function App() {
       {!inTelegram && <Navbar />}
       <main className="flex-1">
         <Routes>
-          <Route
-            path="/"
-            element={inTelegram ? <TelegramHome /> : <Home />}
-          />
+          <Route path="/" element={inTelegram ? <TelegramHome /> : <Home />} />
+          <Route path="/contact" element={inTelegram ? <ContactShare /> : <Navigate to="/" replace />} />
           <Route path="/chipta" element={<Tickets />} />
           <Route path="/dastur" element={<Program />} />
           <Route path="/yangiliklar" element={<News />} />

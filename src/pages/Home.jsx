@@ -1,6 +1,8 @@
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import CountdownTimer from '../components/CountdownTimer'
 import XButton from '../components/XButton'
+import { isTelegram } from '../lib/telegram'
 
 const features = [
   {
@@ -34,8 +36,54 @@ const features = [
 ]
 
 export default function Home() {
+  const [showPopup, setShowPopup] = useState(false)
+  const navigate = useNavigate()
+  const inTelegram = isTelegram()
+
+  useEffect(() => {
+    if (!inTelegram) return
+    const timer = setTimeout(() => {
+      setShowPopup(true)
+    }, 2000)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div>
+      {/* 2-second popup — only in Telegram */}
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setShowPopup(false)}
+          />
+          <div className="relative bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center">
+            <div className="text-4xl mb-3">🎉</div>
+            <h2 className="text-lg font-bold text-[#1B2D1F] mb-2">
+              Bizda yangi festival bor!
+            </h2>
+            <p className="text-[#40916C] text-sm mb-5">
+              Chipta sotib oling va festivalni o'tkazib yubormang!
+            </p>
+            <button
+              onClick={() => {
+                setShowPopup(false)
+                navigate('/chipta')
+              }}
+              className="w-full bg-[#2D6A4F] text-white font-bold py-3.5 rounded-2xl hover:bg-[#40916C] transition-colors text-sm mb-3"
+            >
+              🎟️ Chipta sotib olish
+            </button>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="text-gray-400 text-xs"
+            >
+              Keyinroq
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#40916C] text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
