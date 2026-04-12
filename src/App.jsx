@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import SplashScreen from './components/SplashScreen'
+import Onboarding from './components/Onboarding'
 import Home from './pages/Home'
 import Tickets from './pages/Tickets'
 import Program from './pages/Program'
@@ -26,11 +27,23 @@ function TelegramHome() {
 
 export default function App() {
   const alreadySeen = sessionStorage.getItem('splash_shown')
+  const onboardingDone = localStorage.getItem('onboarding_done')
+
   const [showSplash, setShowSplash] = useState(!alreadySeen)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   function handleSplashDone() {
     sessionStorage.setItem('splash_shown', 'true')
     setShowSplash(false)
+    // Show onboarding only on very first visit ever
+    if (!onboardingDone) {
+      setShowOnboarding(true)
+    }
+  }
+
+  function handleOnboardingDone() {
+    localStorage.setItem('onboarding_done', 'true')
+    setShowOnboarding(false)
   }
 
   return (
@@ -49,6 +62,7 @@ export default function App() {
         }}
       />
       {showSplash && <SplashScreen onDone={handleSplashDone} />}
+      {showOnboarding && <Onboarding onDone={handleOnboardingDone} />}
       {!inTelegram && <Navbar />}
       <main className="flex-1">
         <Routes>
