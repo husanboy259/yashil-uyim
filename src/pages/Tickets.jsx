@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
-import { getTelegramUser, isTelegram, requestPhone } from '../lib/telegram'
+import { getTelegramUser, isTelegram } from '../lib/telegram'
 import XButton from '../components/XButton'
 
 const inTelegram = isTelegram()
@@ -32,13 +32,6 @@ export default function Tickets() {
     },
   })
 
-  // Auto-request phone when Mini App opens in Telegram
-  useEffect(() => {
-    if (!inTelegram) return
-    requestPhone((phone) => {
-      setValue('phone', phone, { shouldValidate: true })
-    })
-  }, [])
 
   const onSubmit = async (data) => {
     setLoading(true)

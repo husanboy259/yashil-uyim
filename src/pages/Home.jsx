@@ -42,8 +42,10 @@ export default function Home() {
 
   useEffect(() => {
     if (!inTelegram) return
+    if (sessionStorage.getItem('tg_popup_shown')) return
     const timer = setTimeout(() => {
       setShowPopup(true)
+      sessionStorage.setItem('tg_popup_shown', 'true')
     }, 2000)
     return () => clearTimeout(timer)
   }, [])
