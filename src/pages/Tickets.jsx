@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { getTelegramUser, isTelegram } from '../lib/telegram'
+import { playTing } from '../lib/sound'
 import XButton from '../components/XButton'
 
 const inTelegram = isTelegram()
@@ -46,6 +47,7 @@ export default function Tickets() {
       if (error) throw error
       setSubmitted(true)
       reset()
+      playTing()
       toast.success("Ro'yxatdan muvaffaqiyatli o'tdingiz!")
     } catch (err) {
       console.error(err)
