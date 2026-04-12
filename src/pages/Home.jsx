@@ -62,10 +62,33 @@ const features = [
   },
 ]
 
+function useCountdownTo(targetDate) {
+  const [timeLeft, setTimeLeft] = useState({})
+
+  useEffect(() => {
+    function calc() {
+      const diff = new Date(targetDate) - new Date()
+      if (diff <= 0) return setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+      setTimeLeft({
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor((diff % 86400000) / 3600000),
+        minutes: Math.floor((diff % 3600000) / 60000),
+        seconds: Math.floor((diff % 60000) / 1000),
+      })
+    }
+    calc()
+    const id = setInterval(calc, 1000)
+    return () => clearInterval(id)
+  }, [targetDate])
+
+  return timeLeft
+}
+
 export default function Home() {
   const [showPopup, setShowPopup] = useState(false)
   const navigate = useNavigate()
   const inTelegram = isTelegram()
+  const countdown = useCountdownTo('2026-04-25T00:00:00')
 
   useEffect(() => {
     if (!inTelegram) return
@@ -88,12 +111,29 @@ export default function Home() {
           />
           <div className="relative bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center">
             <div className="text-4xl mb-3">🎉</div>
-            <h2 className="text-lg font-bold text-[#1B2D1F] mb-2">
+            <h2 className="text-lg font-bold text-[#1B2D1F] mb-1">
               Bizda yangi festival bor!
             </h2>
-            <p className="text-[#40916C] text-sm mb-5">
-              Chipta sotib oling va festivalni o'tkazib yubormang!
+            <p className="text-[#40916C] text-sm mb-4">
+              25-aprel — festivalgacha qoldi:
             </p>
+
+            {/* Live countdown */}
+            <div className="flex justify-center gap-2 mb-5">
+              {[
+                { label: 'kun', value: countdown.days },
+                { label: 'soat', value: countdown.hours },
+                { label: 'daq', value: countdown.minutes },
+                { label: 'son', value: countdown.seconds },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex flex-col items-center bg-[#D8F3DC] rounded-xl px-3 py-2 min-w-[52px]">
+                  <span className="text-2xl font-bold text-[#2D6A4F] tabular-nums leading-none">
+                    {String(value ?? 0).padStart(2, '0')}
+                  </span>
+                  <span className="text-[10px] text-[#40916C] mt-0.5">{label}</span>
+                </div>
+              ))}
+            </div>
             <button
               onClick={() => {
                 setShowPopup(false)
