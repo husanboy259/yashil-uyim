@@ -27,22 +27,19 @@ function TelegramHome() {
 
 export default function App() {
   const alreadySeen = sessionStorage.getItem('splash_shown')
-  const onboardingDone = localStorage.getItem('onboarding_done')
+  const shouldShowOnboarding = sessionStorage.getItem('show_onboarding')
 
   const [showSplash, setShowSplash] = useState(!alreadySeen)
-  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(!!shouldShowOnboarding)
 
   function handleSplashDone() {
     sessionStorage.setItem('splash_shown', 'true')
     setShowSplash(false)
-    // Show onboarding only on very first visit ever
-    if (!onboardingDone) {
-      setShowOnboarding(true)
-    }
   }
 
   function handleOnboardingDone() {
     localStorage.setItem('onboarding_done', 'true')
+    sessionStorage.removeItem('show_onboarding')
     setShowOnboarding(false)
   }
 

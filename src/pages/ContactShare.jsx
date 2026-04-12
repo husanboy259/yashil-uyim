@@ -23,6 +23,9 @@ export default function ContactShare() {
 
   const handleContinue = () => {
     setShowModal(false)
+    if (!localStorage.getItem('onboarding_done')) {
+      sessionStorage.setItem('show_onboarding', 'true')
+    }
     navigate('/')
   }
 
