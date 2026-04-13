@@ -15,6 +15,7 @@ export default function Tickets() {
   const [formData, setFormData] = useState(null)
   const [receipt, setReceipt] = useState(null)
   const [preview, setPreview] = useState(null)
+  const [ticketInfo, setTicketInfo] = useState(null)
   const fileRef = useRef()
 
   const tgUser = getTelegramUser()
@@ -108,6 +109,13 @@ export default function Tickets() {
         }),
       })
 
+      setTicketInfo({
+        number: ticketNum,
+        full_name: formData.full_name,
+        username: tgUser?.username || null,
+        phone: formData.phone,
+        ticket_count: formData.ticket_count,
+      })
       setStep(3)
     } catch (err) {
       console.error('Submit error:', err)
@@ -117,23 +125,84 @@ export default function Tickets() {
     }
   }
 
-  // ── STEP 3: Pending ──────────────────────────────────────────
-  if (step === 3) {
+  // ── STEP 3: Pending + Ticket card ───────────────────────────
+  if (step === 3 && ticketInfo) {
     return (
-      <div className="min-h-screen bg-[#F0FFF4] flex flex-col items-center justify-center px-4 text-center">
-        <XButton />
-        <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-lg border border-[#B7E4C7]">
-          <div className="text-6xl mb-4">⏳</div>
-          <h2 className="text-xl font-bold text-[#1B2D1F] mb-2">Kutilmoqda</h2>
-          <p className="text-[#40916C] text-sm leading-relaxed mb-6">
-            Chekingiz admin tomonidan tekshirilmoqda.
-            Tasdiqlangach Telegram botdan chiptangiz yuboriladi.
-          </p>
-          <div className="bg-[#D8F3DC] rounded-2xl px-4 py-3 flex items-center gap-3">
-            <span className="text-2xl">🤖</span>
-            <p className="text-sm text-[#2D6A4F] font-medium text-left">
-              Natijani botdan kuting — odatda 5–15 daqiqa ichida
-            </p>
+      <div className="min-h-screen bg-[#F0FFF4] py-8 px-4">
+        <div className="max-w-sm mx-auto">
+          <XButton />
+
+          {/* Pending badge */}
+          <div className="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-5">
+            <span className="text-xl">⏳</span>
+            <div>
+              <p className="text-sm font-bold text-amber-700">Kutilmoqda</p>
+              <p className="text-xs text-amber-600">Admin tasdiqlashi kutilmoqda — botdan xabar olasiz</p>
+            </div>
+          </div>
+
+          {/* Ticket card */}
+          <div className="rounded-3xl overflow-hidden shadow-2xl">
+
+            {/* Top */}
+            <div className="bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#40916C] px-6 pt-8 pb-6 text-white text-center">
+              <div className="text-5xl mb-3">🌿</div>
+              <h1 className="text-2xl font-bold tracking-tight">Yashil Uyim</h1>
+              <p className="text-green-200 text-sm">Ekologik Festival</p>
+              <div className="mt-4 inline-block bg-white/20 rounded-full px-4 py-1.5 text-sm font-semibold">
+                25-aprel · Toshkent
+              </div>
+            </div>
+
+            {/* Dashed divider */}
+            <div className="bg-white flex items-center">
+              <div className="w-5 h-5 rounded-full bg-[#F0FFF4] -ml-2.5 shrink-0" />
+              <div className="flex-1 border-t-2 border-dashed border-[#B7E4C7]" />
+              <div className="w-5 h-5 rounded-full bg-[#F0FFF4] -mr-2.5 shrink-0" />
+            </div>
+
+            {/* Info */}
+            <div className="bg-white px-6 py-6 space-y-3">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-gray-400 uppercase tracking-widest">Chipta №</span>
+                <span className="font-bold text-[#2D6A4F] text-lg">#{ticketInfo.number}</span>
+              </div>
+
+              {[
+                { icon: '👤', label: "To'liq ism",   value: ticketInfo.full_name },
+                ticketInfo.username && { icon: '✈️', label: 'Telegram', value: `@${ticketInfo.username}` },
+                { icon: '📱', label: 'Telefon',       value: ticketInfo.phone },
+                { icon: '🎫', label: 'Chipta soni',   value: `${ticketInfo.ticket_count} ta` },
+              ].filter(Boolean).map(({ icon, label, value }) => (
+                <div key={label} className="flex items-center gap-3 bg-[#F0FFF4] rounded-xl px-4 py-3">
+                  <span className="text-xl">{icon}</span>
+                  <div>
+                    <p className="text-xs text-gray-400">{label}</p>
+                    <p className="font-semibold text-[#1B2D1F]">{value}</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Barcode */}
+              <div className="pt-2">
+                <div className="flex justify-center gap-0.5">
+                  {Array.from({ length: 28 }).map((_, i) => (
+                    <div key={i} className="bg-[#2D6A4F] rounded-sm opacity-40"
+                      style={{ width: i % 3 === 0 ? '3px' : '2px', height: i % 5 === 0 ? '40px' : '32px' }} />
+                  ))}
+                </div>
+                <p className="text-center text-xs text-gray-300 mt-2">
+                  #{ticketInfo.number}-YASHIL-UYIM-2026
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom */}
+            <div className="bg-[#D8F3DC] px-6 py-4 text-center">
+              <p className="text-xs text-[#2D6A4F] font-medium">
+                🤖 Admin tasdiqlashi bilanoq botdan chipta keladi
+              </p>
+            </div>
           </div>
         </div>
       </div>
