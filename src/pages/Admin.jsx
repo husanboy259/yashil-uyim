@@ -36,7 +36,12 @@ export default function Admin() {
       .from('tickets')
       .select('*')
       .order('created_at', { ascending: false })
-    if (!error) setTickets(data || [])
+    if (error) {
+      toast.error('DB xato: ' + error.message)
+      console.error(error)
+    } else {
+      setTickets(data || [])
+    }
     setLoading(false)
   }
 
