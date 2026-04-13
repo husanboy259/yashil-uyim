@@ -44,13 +44,34 @@ export default async function handler(req, res) {
       await editMessageReplyMarkup(message.chat.id, message.message_id)
       await answerCallback(id, '✅ Allowed!')
 
-      await sendMessage(chatId,
-        `🎟 <b>Chiptangiz tasdiqlandi!</b>\n\n` +
-        `🌿 <b>Yashil Uyim Ekologik Festival</b>\n` +
-        `📅 25-aprel · Toshkent\n\n` +
-        `🔢 Chipta №: <b>#${ticketNum}</b>\n\n` +
-        `Festival kunida shu xabarni ko'rsating. Sizni kutib qolamiz! 🌱`
-      )
+      // Parse ticket info from admin message caption
+      const caption = message.caption || message.text || ''
+      const clean = caption.replace(/<[^>]+>/g, '')
+      const get = (label) => {
+        const line = clean.split('\n').find(l => l.includes(label))
+        return line ? line.split(label)[1].trim() : ''
+      }
+      const full_name    = get('Ism:')
+      const phone        = get('Telefon:')
+      const ticket_count = get('Chipta soni:')
+      const usernameLine = clean.split('\n').find(l => l.startsWith('🆔 @'))
+      const username     = usernameLine ? usernameLine.replace('🆔 @', '').trim() : null
+
+      const ticketMsg =
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `🌿 <b>YASHIL UYIM</b>\n` +
+        `   Ekologik Festival\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `🎟 <b>Chipta № #${ticketNum}</b>\n\n` +
+        `👤 <b>${full_name}</b>\n` +
+        (username ? `✈️ @${username}\n` : '') +
+        `📱 ${phone}\n` +
+        `🎫 ${ticket_count} ta chipta\n\n` +
+        `📅 <b>25-aprel · Toshkent</b>\n\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `Festival kunida shu xabarni ko'rsating! 🌱`
+
+      await sendMessage(chatId, ticketMsg)
       await sendMessage(message.chat.id, `✅ #${ticketNum} — chipta yuborildi.`)
     }
 
