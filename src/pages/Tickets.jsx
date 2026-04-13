@@ -10,7 +10,7 @@ const CARD_NUMBER = '9999 9999 9999 9999'
 const PRICE_PER_TICKET = 10000 // so'm
 
 export default function Tickets() {
-  const [step, setStep] = useState(0)   // 0=form 1=payment 2=upload 3=pending
+  const [step, setStep] = useState(0)   // 0=form 1=payment 2=upload 3=pending 4=approved 5=fake
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState(null)
   const [receipt, setReceipt] = useState(null)
@@ -123,6 +123,121 @@ export default function Tickets() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Poll Supabase while pending
+  useEffect(() => {
+    if (step !== 3 || !ticketInfo?.number) return
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from('tickets')
+        .select('status')
+        .eq('ticket_number', ticketInfo.number)
+        .single()
+      if (data?.status === 'approved') {
+        clearInterval(interval)
+        setStep(4)
+      } else if (data?.status === 'fake') {
+        clearInterval(interval)
+        setStep(5)
+      }
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [step, ticketInfo])
+
+  // ── STEP 5: Fake ─────────────────────────────────────────────
+  if (step === 5) {
+    return (
+      <div className="min-h-screen bg-[#F0FFF4] flex flex-col items-center justify-center px-4 text-center">
+        <XButton />
+        <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-lg border border-red-200">
+          <div className="text-6xl mb-4">❌</div>
+          <h2 className="text-xl font-bold text-red-600 mb-2">Fayl soxta!</h2>
+          <p className="text-gray-500 text-sm leading-relaxed mb-6">
+            Yuborgan chekingiz tasdiqlanmadi. Iltimos haqiqiy to'lov chekini yuboring.
+          </p>
+          <button
+            onClick={() => { setStep(2); setReceipt(null); setPreview(null) }}
+            className="w-full bg-[#2D6A4F] text-white font-bold py-3.5 rounded-2xl hover:bg-[#40916C] transition-colors"
+          >
+            Qayta yuborish
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── STEP 4: Approved — clean ticket ─────────────────────────
+  if (step === 4 && ticketInfo) {
+    return (
+      <div className="min-h-screen bg-[#F0FFF4] py-8 px-4">
+        <div className="max-w-sm mx-auto">
+          <XButton />
+
+          <div className="flex items-center justify-center gap-2 bg-green-50 border border-green-200 rounded-2xl px-4 py-3 mb-5">
+            <span className="text-xl">✅</span>
+            <p className="text-sm font-bold text-green-700">Chipta tasdiqlandi!</p>
+          </div>
+
+          <div className="rounded-3xl overflow-hidden shadow-2xl">
+            <div className="bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#40916C] px-6 pt-8 pb-6 text-white text-center">
+              <div className="text-5xl mb-3">🌿</div>
+              <h1 className="text-2xl font-bold tracking-tight">Yashil Uyim</h1>
+              <p className="text-green-200 text-sm">Ekologik Festival</p>
+              <div className="mt-4 inline-block bg-white/20 rounded-full px-4 py-1.5 text-sm font-semibold">
+                25-aprel · Toshkent
+              </div>
+            </div>
+
+            <div className="bg-white flex items-center">
+              <div className="w-5 h-5 rounded-full bg-[#F0FFF4] -ml-2.5 shrink-0" />
+              <div className="flex-1 border-t-2 border-dashed border-[#B7E4C7]" />
+              <div className="w-5 h-5 rounded-full bg-[#F0FFF4] -mr-2.5 shrink-0" />
+            </div>
+
+            <div className="bg-white px-6 py-6 space-y-3">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs text-gray-400 uppercase tracking-widest">Chipta №</span>
+                <span className="font-bold text-[#2D6A4F] text-lg">#{ticketInfo.number}</span>
+              </div>
+
+              {[
+                { icon: '👤', label: "To'liq ism", value: ticketInfo.full_name },
+                ticketInfo.username && { icon: '✈️', label: 'Telegram', value: `@${ticketInfo.username}` },
+                { icon: '📱', label: 'Telefon',     value: ticketInfo.phone },
+                { icon: '🎫', label: 'Chipta soni', value: `${ticketInfo.ticket_count} ta` },
+              ].filter(Boolean).map(({ icon, label, value }) => (
+                <div key={label} className="flex items-center gap-3 bg-[#F0FFF4] rounded-xl px-4 py-3">
+                  <span className="text-xl">{icon}</span>
+                  <div>
+                    <p className="text-xs text-gray-400">{label}</p>
+                    <p className="font-semibold text-[#1B2D1F]">{value}</p>
+                  </div>
+                </div>
+              ))}
+
+              <div className="pt-2">
+                <div className="flex justify-center gap-0.5">
+                  {Array.from({ length: 28 }).map((_, i) => (
+                    <div key={i} className="bg-[#2D6A4F] rounded-sm"
+                      style={{ width: i % 3 === 0 ? '3px' : '2px', height: i % 5 === 0 ? '40px' : '32px' }} />
+                  ))}
+                </div>
+                <p className="text-center text-xs text-gray-300 mt-2">
+                  #{ticketInfo.number}-YASHIL-UYIM-2026
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-[#D8F3DC] px-6 py-4 text-center">
+              <p className="text-xs text-[#2D6A4F] font-medium">
+                Festival kunida shu chiptani ko'rsating 🌿
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // ── STEP 3: Pending + Ticket card ───────────────────────────
