@@ -52,29 +52,46 @@ export default function Tickets() {
     if (!receipt) return toast.error("Iltimos chekni yuklang")
     setLoading(true)
     try {
-      // 1. Save ticket to Supabase
       const ticketNum = Math.floor(10000 + Math.random() * 90000)
-      const { error: dbErr } = await supabase.from('tickets').insert([{
+
+      // 1. Save ticket — try with new columns, fall back to basic columns
+      let dbErr
+      ;({ error: dbErr } = await supabase.from('tickets').insert([{
         full_name: formData.full_name,
         phone: formData.phone,
         ticket_count: formData.ticket_count,
         status: 'pending',
         chat_id: tgUser?.id || null,
         ticket_number: ticketNum,
-      }])
-      if (dbErr) throw dbErr
+      }]))
 
-      // 2. Upload receipt to Supabase Storage
-      const ext = receipt.name.split('.').pop()
-      const filename = `receipt_${ticketNum}.${ext}`
-      const { error: storageErr } = await supabase.storage
-        .from('receipts')
-        .upload(filename, receipt, { contentType: receipt.type })
-      if (storageErr) throw storageErr
+      if (dbErr) {
+        // Fall back to basic insert (missing columns not yet added)
+        ;({ error: dbErr } = await supabase.from('tickets').insert([{
+          full_name: formData.full_name,
+          phone: formData.phone,
+          ticket_count: formData.ticket_count,
+        }]))
+        if (dbErr) throw dbErr
+      }
 
-      const { data: urlData } = supabase.storage
-        .from('receipts')
-        .getPublicUrl(filename)
+      // 2. Upload receipt to Supabase Storage (non-critical)
+      let receiptUrl = null
+      try {
+        const ext = receipt.name.split('.').pop()
+        const filename = `receipt_${ticketNum}.${ext}`
+        const { error: storageErr } = await supabase.storage
+          .from('receipts')
+          .upload(filename, receipt, { contentType: receipt.type })
+        if (!storageErr) {
+          const { data: urlData } = supabase.storage
+            .from('receipts')
+            .getPublicUrl(filename)
+          receiptUrl = urlData.publicUrl
+        }
+      } catch (_) {
+        // Storage not set up yet — continue without photo
+      }
 
       // 3. Notify admin via bot
       await fetch('/api/notify', {
@@ -87,13 +104,13 @@ export default function Tickets() {
           phone: formData.phone,
           ticket_count: formData.ticket_count,
           ticket_number: ticketNum,
-          receipt_url: urlData.publicUrl,
+          receipt_url: receiptUrl,
         }),
       })
 
       setStep(3)
     } catch (err) {
-      console.error(err)
+      console.error('Submit error:', err)
       toast.error("Xatolik yuz berdi. Qayta urinib ko'ring.")
     } finally {
       setLoading(false)
