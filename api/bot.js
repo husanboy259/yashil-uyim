@@ -40,34 +40,30 @@ export default async function handler(req, res) {
     const { id, data, message } = body.callback_query
     const [action, chatId, ticketNum] = (data || '').split('|')
 
-    if (action === 'approve' && chatId) {
-      // Remove buttons from admin message
+    if (action === 'allow' && chatId) {
       await editMessageReplyMarkup(message.chat.id, message.message_id)
-      await answerCallback(id, '✅ Tasdiqlandi!')
+      await answerCallback(id, '✅ Allowed!')
 
-      // Send ticket to user
-      const ticketMsg =
+      await sendMessage(chatId,
         `🎟 <b>Chiptangiz tasdiqlandi!</b>\n\n` +
         `🌿 <b>Yashil Uyim Ekologik Festival</b>\n` +
         `📅 25-aprel · Toshkent\n\n` +
         `🔢 Chipta №: <b>#${ticketNum}</b>\n\n` +
         `Festival kunida shu xabarni ko'rsating. Sizni kutib qolamiz! 🌱`
-
-      await sendMessage(chatId, ticketMsg)
-
-      // Notify admin confirmation
-      await sendMessage(message.chat.id, `✅ #${ticketNum} — chipta foydalanuvchiga yuborildi.`)
+      )
+      await sendMessage(message.chat.id, `✅ #${ticketNum} — chipta yuborildi.`)
     }
 
-    if (action === 'reject' && chatId) {
+    if (action === 'fake' && chatId) {
       await editMessageReplyMarkup(message.chat.id, message.message_id)
-      await answerCallback(id, '❌ Rad etildi')
+      await answerCallback(id, '❌ Fake!')
 
       await sendMessage(chatId,
-        `❌ <b>Afsuski, chiptangiz tasdiqlanmadi.</b>\n\n` +
-        `Muammo bo'lsa admin bilan bog'laning yoki qayta urinib ko'ring.`
+        `❌ <b>Your file is fake!</b>\n\n` +
+        `Yuborgan chekingiz tasdiqlanmadi — hujjat soxta yoki noto'g'ri.\n\n` +
+        `Iltimos, haqiqiy to'lov chekini yuboring yoki admin bilan bog'laning.`
       )
-      await sendMessage(message.chat.id, `❌ #${ticketNum} — rad etildi.`)
+      await sendMessage(message.chat.id, `❌ #${ticketNum} — fake deb belgilandi.`)
     }
 
     return res.status(200).json({ ok: true })

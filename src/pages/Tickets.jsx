@@ -15,7 +15,6 @@ export default function Tickets() {
   const [formData, setFormData] = useState(null)
   const [receipt, setReceipt] = useState(null)
   const [preview, setPreview] = useState(null)
-  const [showPermission, setShowPermission] = useState(true) // fake permission dialog
   const fileRef = useRef()
 
   const tgUser = getTelegramUser()
@@ -131,121 +130,54 @@ export default function Tickets() {
         <div className="max-w-sm mx-auto">
           <XButton />
 
-          {/* Fake Telegram permission dialog */}
-          {showPermission && (
-            <div className="fixed inset-0 z-50 flex items-end justify-center">
-              <div className="absolute inset-0 bg-black/50" />
-              <div className="relative bg-white rounded-t-3xl w-full max-w-md px-6 pt-5 pb-8 animate-slide-up">
-                {/* Handle */}
-                <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
+          <div className="text-center mb-6">
+            <div className="text-4xl mb-2">📎</div>
+            <h2 className="text-2xl font-bold text-[#1B2D1F]">Chekni yuklang</h2>
+            <p className="text-[#40916C] text-sm mt-1">To'lov cheki yoki skrinshot</p>
+          </div>
 
-                {/* App icon */}
-                <div className="flex flex-col items-center mb-5">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2D6A4F] to-[#52B788] flex items-center justify-center text-3xl mb-3 shadow-lg">
-                    🌿
-                  </div>
-                  <h3 className="text-base font-bold text-gray-900 text-center">
-                    Yashil Uyim would like to access your Photos
-                  </h3>
-                  <p className="text-sm text-gray-500 text-center mt-1">
-                    To upload your payment receipt
-                  </p>
-                </div>
+          <div
+            onClick={() => fileRef.current.click()}
+            className="bg-white border-2 border-dashed border-[#52B788] rounded-2xl p-6 text-center cursor-pointer hover:bg-[#D8F3DC] transition-colors mb-5"
+          >
+            {preview ? (
+              <img src={preview} alt="Chek" className="w-full max-h-64 object-contain rounded-xl" />
+            ) : (
+              <>
+                <div className="text-5xl mb-3">🖼️</div>
+                <p className="text-[#2D6A4F] font-semibold">Rasmni yuklash</p>
+                <p className="text-gray-400 text-xs mt-1">JPG, PNG · max 5MB</p>
+              </>
+            )}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={onFileSelect}
+            />
+          </div>
 
-                {/* Permission options */}
-                <div className="space-y-2 mb-4">
-                  <button
-                    onClick={() => {
-                      setShowPermission(false)
-                      fileRef.current.click()
-                    }}
-                    className="w-full bg-[#007AFF] text-white font-semibold py-3.5 rounded-2xl text-base hover:opacity-90 transition-opacity"
-                  >
-                    Allow Access to All Photos
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowPermission(false)
-                      fileRef.current.click()
-                    }}
-                    className="w-full bg-[#007AFF]/10 text-[#007AFF] font-semibold py-3.5 rounded-2xl text-base hover:opacity-80 transition-opacity"
-                  >
-                    Select Photos...
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowPermission(false)
-                      fileRef.current.click()
-                    }}
-                    className="w-full bg-gray-100 text-gray-800 font-semibold py-3.5 rounded-2xl text-base hover:bg-gray-200 transition-colors"
-                  >
-                    Take Photo or Video
-                  </button>
-                  <button
-                    onClick={() => setStep(1)}
-                    className="w-full bg-gray-100 text-red-500 font-semibold py-3.5 rounded-2xl text-base hover:bg-gray-200 transition-colors"
-                  >
-                    Don't Allow
-                  </button>
-                </div>
-              </div>
-            </div>
+          {preview && (
+            <button
+              onClick={() => { setReceipt(null); setPreview(null) }}
+              className="w-full text-sm text-gray-400 mb-3"
+            >
+              Boshqa rasm tanlash
+            </button>
           )}
 
-          {/* Upload area (shown after permission granted) */}
-          {!showPermission && (
-            <>
-              <div className="text-center mb-6">
-                <div className="text-4xl mb-2">📎</div>
-                <h2 className="text-2xl font-bold text-[#1B2D1F]">Chekni yuklang</h2>
-                <p className="text-[#40916C] text-sm mt-1">To'lov cheki yoki skrinshot</p>
-              </div>
+          <button
+            onClick={onUploadSubmit}
+            disabled={loading || !receipt}
+            className="w-full bg-[#2D6A4F] text-white font-bold py-4 rounded-2xl hover:bg-[#40916C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Yuklanmoqda...' : '📤 Yuborish'}
+          </button>
 
-              <div
-                onClick={() => fileRef.current.click()}
-                className="bg-white border-2 border-dashed border-[#52B788] rounded-2xl p-6 text-center cursor-pointer hover:bg-[#D8F3DC] transition-colors mb-5"
-              >
-                {preview ? (
-                  <img src={preview} alt="Chek" className="w-full max-h-64 object-contain rounded-xl" />
-                ) : (
-                  <>
-                    <div className="text-5xl mb-3">🖼️</div>
-                    <p className="text-[#2D6A4F] font-semibold">Rasmni yuklash</p>
-                    <p className="text-gray-400 text-xs mt-1">JPG, PNG · max 5MB</p>
-                  </>
-                )}
-              </div>
-
-              {preview && (
-                <button
-                  onClick={() => { setReceipt(null); setPreview(null) }}
-                  className="w-full text-sm text-gray-400 mb-3"
-                >
-                  Boshqa rasm tanlash
-                </button>
-              )}
-
-              <button
-                onClick={onUploadSubmit}
-                disabled={loading || !receipt}
-                className="w-full bg-[#2D6A4F] text-white font-bold py-4 rounded-2xl hover:bg-[#40916C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Yuklanmoqda...' : '📤 Yuborish'}
-              </button>
-
-              <button onClick={() => setStep(1)} className="w-full text-sm text-gray-400 mt-3">
-                ← Orqaga
-              </button>
-            </>
-          )}
-
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={onFileSelect}
-          />
+          <button onClick={() => setStep(1)} className="w-full text-sm text-gray-400 mt-3">
+            ← Orqaga
+          </button>
         </div>
       </div>
     )

@@ -38,15 +38,15 @@ export default async function handler(req, res) {
     `${chatId ? `💬 Chat ID: <code>${chatId}</code>` : ''}`
 
   // callback_data: "approve|chatId|ticketNum" (max 64 chars)
-  const approveData = `approve|${chatId}|${ticket_number}`
-  const rejectData  = `reject|${chatId}|${ticket_number}`
+  const allowData = `allow|${chatId}|${ticket_number}`
+  const fakeData  = `fake|${chatId}|${ticket_number}`
 
   try {
     if (receipt_url) {
       await sendPhoto(ADMIN_ID, receipt_url, caption, {
         inline_keyboard: [[
-          { text: '✅ Tasdiqlash', callback_data: approveData },
-          { text: '❌ Rad etish',  callback_data: rejectData  },
+          { text: '✅ Allow', callback_data: allowData },
+          { text: '❌ Fake',  callback_data: fakeData  },
         ]],
       })
     } else {
