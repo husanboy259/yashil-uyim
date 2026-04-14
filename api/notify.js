@@ -41,16 +41,27 @@ export default async function handler(req, res) {
   const allowData = `allow|${chatId}|${ticket_number}`
   const fakeData  = `fake|${chatId}|${ticket_number}`
 
+  const buttons = {
+    inline_keyboard: [[
+      { text: '✅ Allow', callback_data: allowData },
+      { text: '❌ Fake',  callback_data: fakeData  },
+    ]],
+  }
+
   try {
     if (receipt_url) {
-      await sendPhoto(ADMIN_ID, receipt_url, caption, {
-        inline_keyboard: [[
-          { text: '✅ Allow', callback_data: allowData },
-          { text: '❌ Fake',  callback_data: fakeData  },
-        ]],
-      })
+      await sendPhoto(ADMIN_ID, receipt_url, caption, buttons)
     } else {
-      await sendMessage(ADMIN_ID, caption)
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: ADMIN_ID,
+          text: caption,
+          parse_mode: 'HTML',
+          reply_markup: buttons,
+        }),
+      })
     }
   } catch (e) {
     console.error('notify error:', e)
