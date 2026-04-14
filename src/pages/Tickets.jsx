@@ -91,6 +91,10 @@ export default function Tickets() {
             .from('receipts')
             .getPublicUrl(filename)
           receiptUrl = urlData.publicUrl
+          // Save receipt_url to DB
+          await supabase.from('tickets')
+            .update({ receipt_url: receiptUrl })
+            .eq('ticket_number', ticketNum)
         }
       } catch (_) {
         // Storage not set up yet — continue without photo

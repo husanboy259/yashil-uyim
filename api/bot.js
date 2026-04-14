@@ -1,5 +1,19 @@
 const BOT_TOKEN = process.env.BOT_TOKEN
 const APP_URL = 'https://yashil-uyim.vercel.app'
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL
+const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY
+
+async function updateTicketStatus(ticketNumber, status) {
+  await fetch(`${SUPABASE_URL}/rest/v1/tickets?ticket_number=eq.${ticketNumber}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+    },
+    body: JSON.stringify({ status }),
+  })
+}
 
 async function sendMessage(chatId, text, replyMarkup) {
   await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -71,6 +85,7 @@ export default async function handler(req, res) {
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `Festival kunida shu xabarni ko'rsating! 🌱`
 
+      await updateTicketStatus(ticketNum, 'approved')
       await sendMessage(chatId, ticketMsg)
       await sendMessage(message.chat.id, `✅ #${ticketNum} — chipta yuborildi.`)
     }
@@ -79,9 +94,10 @@ export default async function handler(req, res) {
       await editMessageReplyMarkup(message.chat.id, message.message_id)
       await answerCallback(id, '❌ Fake!')
 
+      await updateTicketStatus(ticketNum, 'fake')
       await sendMessage(chatId,
-        `❌ <b>Your file is fake!</b>\n\n` +
-        `Yuborgan chekingiz tasdiqlanmadi — hujjat soxta yoki noto'g'ri.\n\n` +
+        `❌ <b>Chekingiz tasdiqlanmadi!</b>\n\n` +
+        `Yuborgan chekingiz soxta yoki noto'g'ri.\n\n` +
         `Iltimos, haqiqiy to'lov chekini yuboring yoki admin bilan bog'laning.`
       )
       await sendMessage(message.chat.id, `❌ #${ticketNum} — fake deb belgilandi.`)
